@@ -22,7 +22,12 @@ export const Asset = {
 
       campaign_id: data.campaign_id,
 
-      captions: Array.isArray(data.captions) ? data.captions : [],
+      captions: {
+        facebook: data.captions?.facebook || '',
+        instagram: data.captions?.instagram || '',
+        linkedin: data.captions?.linkedin || '',
+        twitter: data.captions?.twitter || ''
+      },
 
       images: Array.isArray(data.images) ? data.images.map(img => ({
         url: img.url || '',
@@ -75,7 +80,10 @@ export const Asset = {
     const updatedAsset = {
       ...current,
       ...data,
-      captions: Array.isArray(data.captions) ? data.captions : current.captions,
+      captions: {
+        ...current.captions,
+        ...data.captions
+      },
       images: Array.isArray(data.images) ? data.images : current.images,
       newsletter: {
         ...current.newsletter,

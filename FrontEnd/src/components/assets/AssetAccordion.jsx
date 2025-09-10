@@ -42,7 +42,10 @@ export default function AssetAccordion({ assetSet, campaign, selectedImageUrl, o
         </TabsList>
 
         <TabsContent value="captions" className="mt-6">
-          <CaptionsSection captions={assetSet.captions || []} />
+          <CaptionsSection 
+            captions={assetSet.captions || []} 
+            assetSetId={assetSet.id}
+          />
         </TabsContent>
 
         <TabsContent value="images" className="mt-6">

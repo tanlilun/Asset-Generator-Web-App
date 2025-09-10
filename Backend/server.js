@@ -56,7 +56,7 @@ app.post('/api/assets', async (req, res) => {
   try {
     const {
       campaign_id,
-      captions = [],
+      captions = {},
       images = [],
       newsletter = {},
       ads = {},

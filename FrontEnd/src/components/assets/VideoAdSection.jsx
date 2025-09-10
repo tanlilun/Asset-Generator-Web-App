@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, Save, Play, Video } from "lucide-react";
+import banklogo from "../img/UnionBank-logo.png";
+import visalogo from "../img/VISA-logo.png";
 
 export default function VideoAdSection({ videoAd, assetSetId }) {
   const [overlayText, setOverlayText] = useState(videoAd.overlay_text || "");
@@ -100,14 +102,37 @@ export default function VideoAdSection({ videoAd, assetSetId }) {
               <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center border-2 border-dashed border-purple-200">
                 <div className="text-center">
                   {videoAd.video_url ? (
-                    <video 
-                      className="max-w-full max-h-full rounded-lg"
-                      controls
-                      poster=""
-                    >
-                      <source src={videoAd.video_url} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
+                    <div className="relative w-full h-full rounded-lg overflow-hidden">
+                      <video 
+                        className="w-full h-full object-cover"
+                        controls
+                        poster=""
+                      >
+                        <source src={videoAd.video_url} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    
+                      {/* Overlay Text */}
+                      {overlayText && (
+                        <div className="absolute bottom-16 left-4 text-white font-extrabold text-3xl leading-tight drop-shadow-md uppercase z-10">
+                          {overlayText}
+                        </div>
+                      )}
+                    
+                      {/* Logos */}
+                      <div className="absolute bottom-4 right-4 flex items-center space-x-2 z-10">
+                        <img
+                          src={visalogo}
+                          alt="VISA"
+                          className="h-6 md:h-8"
+                        />
+                        <img
+                          src={banklogo}
+                          alt="Partner Logo"
+                          className="h-6 md:h-8"
+                        />
+                      </div>
+                    </div>                  
                   ) : (
                     <>
                       <Play className="w-16 h-16 text-purple-400 mx-auto mb-2" />
