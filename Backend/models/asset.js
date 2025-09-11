@@ -40,22 +40,39 @@ export const Asset = {
         body: data.newsletter?.body || ''
       },
 
+      // ads: {
+      //   leaderboard: {
+      //     headline: data.ads?.leaderboard?.headline || '',
+      //     body: data.ads?.leaderboard?.body || '',
+      //     cta: data.ads?.leaderboard?.cta || ''
+      //   },
+      //   billboard: {
+      //     headline: data.ads?.billboard?.headline || '',
+      //     body: data.ads?.billboard?.body || '',
+      //     cta: data.ads?.billboard?.cta || ''
+      //   },
+      //   halfpage: {
+      //     headline: data.ads?.halfpage?.headline || '',
+      //     body: data.ads?.halfpage?.body || '',
+      //     cta: data.ads?.halfpage?.cta || ''
+      //   }
+      // },
       ads: {
         leaderboard: {
-          headline: data.ads?.leaderboard?.headline || '',
-          body: data.ads?.leaderboard?.body || '',
-          cta: data.ads?.leaderboard?.cta || ''
+          leaderBoard1: data.ads?.leaderboard?.leaderBoard1 || '',
+          leaderBoard2: data.ads?.leaderboard?.leaderBoard2 || '',
+          leaderBoard3: data.ads?.leaderboard?.leaderBoard3 || '',
         },
         billboard: {
-          headline: data.ads?.billboard?.headline || '',
-          body: data.ads?.billboard?.body || '',
-          cta: data.ads?.billboard?.cta || ''
+          billBoard1: data.ads?.billboard?.billBoard1 || '',
+          billBoard2: data.ads?.billboard?.billBoard2 || '',
+          billBoard3: data.ads?.billboard?.billBoard3 || '',
         },
         halfpage: {
-          headline: data.ads?.halfpage?.headline || '',
-          body: data.ads?.halfpage?.body || '',
-          cta: data.ads?.halfpage?.cta || ''
-        }
+          halfPage1: data.ads?.halfpage?.halfPage1 || '',
+          halfPage2: data.ads?.halfpage?.halfPage2 || '',
+          halfPage3: data.ads?.halfpage?.halfPage3 || '',
+        },
       },
 
       video_ad: {
