@@ -37,7 +37,13 @@ export const Asset = {
 
       newsletter: {
         subject: data.newsletter?.subject || '',
-        body: data.newsletter?.body || ''
+        headline: data.newsletter?.headline || '',
+        caption: data.newsletter?.caption || '',
+        cta: data.newsletter?.cta || '',
+        point1: data.newsletter?.point1 || '',
+        description1: data.newsletter?.description1 || '',
+        point2: data.newsletter?.point2 || '',
+        description2: data.newsletter?.description2 || ''
       },
 
       // ads: {
