@@ -14,6 +14,12 @@ app.get('/api/entities', async (req, res) => {
   res.json(campaigns);
 });
 
+// Get campaign by id
+app.get('/api/entities/:id', async (req, res) => {
+  const campaign = await Campaign.getById(req.params.id);
+  res.json(campaign);
+});
+
 // Create campaign
 app.post('/api/entities', async (req, res) => {
   const campaign = await Campaign.create(req.body);

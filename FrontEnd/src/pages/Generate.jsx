@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Campaign, AssetSet } from "@/api/entities";
-import { InvokeLLM, GenerateImage } from "@/api/integrations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,190 +21,139 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const CAMPAIGN_THEMES = [
-  "Summer Sale",
-  "Black Friday",
-  "Product Launch", 
-  "Brand Awareness",
-  "Holiday Special",
-  "Back to School",
-  "Spring Collection",
-  "Customer Appreciation",
-  "Limited Time Offer",
-  "New Year Campaign"
+const BANK_PRODUCT = [
+  "Credit Card",
+  "Financial Insurance",
+  "Personal Loan", 
+  "Savings Account"
 ];
 
 const AUDIENCE_OPTIONS = [
-  "Young Adults (18-35)",
-  "Professionals (25-45)", 
-  "Parents",
-  "Students",
-  "Seniors (55+)",
-  "Tech Enthusiasts",
-  "Fashion Lovers",
-  "Fitness Enthusiasts",
-  "Business Owners",
-  "Budget-Conscious Shoppers"
+  "Students (18-24 years old)",
+  "Young Professionals (25-35 years old)", 
+  "Travel Enthusiasts",
+  "Empty Nesters"
+];
+
+const CAMPAIGN_THEMES = [
+  "Family",
+  "Travel Rewards",
+  "Dining Experience", 
+  "Retail & Entertainment"
 ];
 
 export default function Generate() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
+    bank_product: "",
+    target_audience: "",
     theme: "",
-    target_audience: [],
     description: ""
-  });
+  });  
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState("");
 
-  const handleAudienceToggle = (audience) => {
-    setFormData(prev => ({
-      ...prev,
-      target_audience: prev.target_audience.includes(audience)
-        ? prev.target_audience.filter(a => a !== audience)
-        : [...prev.target_audience, audience]
-    }));
-  };
-
-  const generateAssets = async () => {
-    if (!formData.name || !formData.theme || formData.target_audience.length === 0) {
+  async function generateAssets() {
+    if (!formData.name || !formData.theme || !formData.target_audience) {
       return;
     }
-
+  
     setIsGenerating(true);
-    
+    setGenerationStep("Creating campaign...");
+  
     try {
-      // Create campaign
-      setGenerationStep("Creating campaign...");
+      // 1. Create campaign (starts generation)
       const campaign = await Campaign.create({
         name: formData.name,
+        bank_product: formData.bank_product,
         theme: formData.theme,
         target_audience: formData.target_audience,
-        status: "generating"
+        description: formData.description,
+        status: "generating",
+        captions_status: "pending",
+        newsletter_status: "pending",
+        images_status: "pending",
+        ads_status: "pending",
+        video_status: "pending",
       });
-
-      // Generate captions
+  
+      // 2. Generate captions
       setGenerationStep("Generating social media captions...");
-      const captionsResult = await InvokeLLM({
-        prompt: `Create 5 engaging social media captions for a ${formData.theme} campaign targeting ${formData.target_audience.join(', ')}. Campaign: ${formData.name}. ${formData.description ? `Additional context: ${formData.description}` : ''}`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            captions: {
-              type: "array",
-              items: { type: "string" }
-            }
-          }
-        }
-      });
-
-      // Generate newsletter content
+      await Campaign.update(campaign.id, { captions_status: "generating" });
+      // Backend generates captions asynchronously or synchronously
+      await waitForStatus(campaign.id, "captions_status", "completed");
+      setGenerationStep("Social media captions generated.");
+  
+      // 3. Generate newsletter content
       setGenerationStep("Creating newsletter content...");
-      const newsletterResult = await InvokeLLM({
-        prompt: `Create a newsletter for a ${formData.theme} campaign targeting ${formData.target_audience.join(', ')}. Campaign: ${formData.name}. Include subject line and HTML body.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            subject: { type: "string" },
-            body: { type: "string" }
-          }
-        }
-      });
-
-      // Generate ad copy
-      setGenerationStep("Writing ad copy...");
-      const adsResult = await InvokeLLM({
-        prompt: `Create display ad copy for different sizes for a ${formData.theme} campaign targeting ${formData.target_audience.join(', ')}. Include headline, body text, and CTA for each size.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            leaderboard: {
-              type: "object",
-              properties: {
-                headline: { type: "string" },
-                body: { type: "string" },
-                cta: { type: "string" }
-              }
-            },
-            billboard: {
-              type: "object", 
-              properties: {
-                headline: { type: "string" },
-                body: { type: "string" },
-                cta: { type: "string" }
-              }
-            },
-            halfpage: {
-              type: "object",
-              properties: {
-                headline: { type: "string" },
-                body: { type: "string" },
-                cta: { type: "string" }
-              }
-            }
-          }
-        }
-      });
-
-      // Generate video script
-      setGenerationStep("Creating video script...");
-      const videoResult = await InvokeLLM({
-        prompt: `Create a 15-second video ad script for a ${formData.theme} campaign targeting ${formData.target_audience.join(', ')}. Include script and overlay text.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            script: { type: "string" },
-            overlay_text: { type: "string" }
-          }
-        }
-      });
-
-      // Generate images
-      setGenerationStep("Generating AI images...");
-      const imagePrompts = [
-        `${formData.theme} marketing campaign, professional, modern, ${formData.target_audience.join(' ')}, high quality`,
-        `${formData.theme} advertising visual, creative, eye-catching, ${formData.target_audience.join(' ')}, vibrant colors`,
-        `${formData.theme} promotional image, sleek design, contemporary, ${formData.target_audience.join(' ')}, premium look`,
-        `${formData.theme} marketing banner, dynamic, engaging, ${formData.target_audience.join(' ')}, bold typography`
-      ];
-
-      const imagePromises = imagePrompts.map(async (prompt, index) => {
-        setGenerationStep(`Generating image ${index + 1} of 4...`);
-        const result = await GenerateImage({ prompt });
-        return {
-          url: result.url,
-          prompt: prompt,
-          selected: index === 0
-        };
-      });
-
-      const images = await Promise.all(imagePromises);
-
-      // Save asset set
-      setGenerationStep("Saving your assets...");
-      await AssetSet.create({
-        campaign_id: campaign.id,
-        captions: captionsResult.captions || [],
-        images: images,
-        newsletter: newsletterResult,
-        ads: adsResult,
-        video_ad: videoResult
-      });
-
-      // Update campaign status
+      await Campaign.update(campaign.id, { newsletter_status: "generating" });
+      await waitForStatus(campaign.id, "newsletter_status", "completed");
+      setGenerationStep("Newsletter content created.");
+  
+      // 4. Generate images
+      setGenerationStep("Generating relevant image...");
+      await Campaign.update(campaign.id, { images_status: "generating" });
+      await waitForStatus(campaign.id, "images_status", "completed");
+      setGenerationStep("Images generated.");
+  
+      // 5. Generate ads copy
+      setGenerationStep("Creating Ad Banners...");
+      await Campaign.update(campaign.id, { ads_status: "generating" });
+      await waitForStatus(campaign.id, "ads_status", "completed");
+      setGenerationStep("Ad Banners ready.");
+  
+      // 6. Generate video script
+      setGenerationStep("Creating short video...");
+      await Campaign.update(campaign.id, { video_status: "generating" });
+      await waitForStatus(campaign.id, "video_status", "completed");
+      setGenerationStep("Short video created.");
+  
+      // 7. Mark campaign complete
       await Campaign.update(campaign.id, { status: "completed" });
-
-      // Navigate to assets page
+      setGenerationStep("All assets generated!");
+  
+      // 8. Fetch all assets
+      const assets = await AssetSet.getByCampaignId(campaign.id);
+  
+      // 9. Navigate to assets page
       navigate(createPageUrl("Assets"));
+  
     } catch (error) {
       console.error("Error generating assets:", error);
-      setGenerationStep("Error occurred. Please try again.");
+      setGenerationStep(error.message || "Error occurred. Please try again.");
     } finally {
       setIsGenerating(false);
     }
-  };
-
+  }
+  
+  // Helper function to poll a specific status field until it matches expected value or timeout
+  function waitForStatus(campaignId, statusField, expectedStatus, timeout = 120000, interval = 2000) {
+    const startTime = Date.now();
+  
+    return new Promise((resolve, reject) => {
+      const timer = setInterval(async () => {
+        try {
+          const campaign = await Campaign.getById(campaignId);
+          if (campaign[statusField] === expectedStatus) {
+            clearInterval(timer);
+            resolve();
+          } else if (campaign[statusField] === "error") {
+            clearInterval(timer);
+            reject(new Error(`Error in ${statusField.replace('_status', '')} generation.`));
+          } else if (Date.now() - startTime > timeout) {
+            clearInterval(timer);
+            reject(new Error(`${statusField.replace('_status', '')} generation timed out.`));
+          }
+          // else keep polling
+        } catch (err) {
+          clearInterval(timer);
+          reject(err);
+        }
+      }, interval);
+    });
+  }
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/30 p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
@@ -241,6 +189,7 @@ export default function Generate() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Campaign Name */}
                   <div className="space-y-2">
                     <Label htmlFor="name" className="text-base font-medium">Campaign Name</Label>
                     <Input
@@ -252,6 +201,47 @@ export default function Generate() {
                     />
                   </div>
 
+                  {/* Bank Product */}
+                  <div className="space-y-2">
+                    <Label htmlFor="bank_product" className="text-base font-medium">Bank Product</Label>
+                    <Select
+                      value={formData.bank_product}
+                      onValueChange={(value) => setFormData({ ...formData, bank_product: value })}
+                    >
+                      <SelectTrigger className="h-12 text-base">
+                        <SelectValue placeholder="Choose a bank product" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BANK_PRODUCT.map((product) => (
+                          <SelectItem key={product} value={product}>
+                            {product}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Target Audience */}
+                  <div className="space-y-2">
+                    <Label htmlFor="audience" className="text-base font-medium">Target Audience</Label>
+                    <Select
+                      value={formData.target_audience}
+                      onValueChange={(value) => setFormData({ ...formData, target_audience: value })}
+                    >
+                      <SelectTrigger className="h-12 text-base">
+                        <SelectValue placeholder="Select target audience" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {AUDIENCE_OPTIONS.map((audience) => (
+                          <SelectItem key={audience} value={audience}>
+                            {audience}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Campaign Theme */}
                   <div className="space-y-2">
                     <Label htmlFor="theme" className="text-base font-medium">Campaign Theme</Label>
                     <Select
@@ -270,34 +260,6 @@ export default function Generate() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Label className="text-base font-medium">Target Audience</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {AUDIENCE_OPTIONS.map((audience) => (
-                      <Badge
-                        key={audience}
-                        variant={formData.target_audience.includes(audience) ? "default" : "outline"}
-                        className={`cursor-pointer transition-all duration-200 justify-center py-2 px-3 ${
-                          formData.target_audience.includes(audience)
-                            ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                            : 'hover:bg-purple-50 hover:border-purple-300'
-                        }`}
-                        onClick={() => handleAudienceToggle(audience)}
-                      >
-                        {audience}
-                        {formData.target_audience.includes(audience) && (
-                          <X className="w-3 h-3 ml-1" />
-                        )}
-                      </Badge>
-                    ))}
-                  </div>
-                  {formData.target_audience.length > 0 && (
-                    <p className="text-sm text-gray-600">
-                      Selected {formData.target_audience.length} audience segment{formData.target_audience.length > 1 ? 's' : ''}
-                    </p>
-                  )}
                 </div>
 
                 <div className="space-y-2">

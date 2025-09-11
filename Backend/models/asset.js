@@ -18,7 +18,7 @@ export const Asset = {
     }
 
     const newAsset = {
-      id: Date.now().toString(),
+      id: data.campaign_id,
 
       campaign_id: data.campaign_id,
 

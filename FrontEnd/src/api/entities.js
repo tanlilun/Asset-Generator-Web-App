@@ -1,19 +1,25 @@
 import { base44 } from './base44Client';
 
-
 // export const Campaign = base44.entities.Campaign;
 
 // export const AssetSet = base44.entities.AssetSet;
 
 // @/api/entities/Campaign.js
 
-const API_BASE = 'http://localhost:3000/api/entities';
+const API_BASE = (import.meta.env.VITE_HOSTED_URL || 'http://localhost:3000') + '/api/entities';
 
 export const Campaign = {
   // GET /api/entities?sort=...
   async list(sort = '') {
     const res = await fetch(`${API_BASE}?sort=${encodeURIComponent(sort)}`);
     if (!res.ok) throw new Error('Failed to fetch campaigns');
+    return res.json();
+  },
+
+  // GET /api/entities/:id
+  async getById(id) {
+    const res = await fetch(`${API_BASE}/${id}`);
+    if (!res.ok) throw new Error('Failed to fetch campaign');
     return res.json();
   },
 
@@ -61,7 +67,7 @@ export const Campaign = {
   
 // frontend/api/Asset.js (or wherever your front-end code resides)
 
-const Asset_API = 'http://localhost:3000/api/assets';
+const Asset_API = (import.meta.env.VITE_HOSTED_URL || 'http://localhost:3000') + '/api/assets';
 
 export const AssetSet = {
   // GET /api/assets?sort=...

@@ -311,14 +311,14 @@ export default function Assets() {
                                       {format(new Date(campaign.created_date), 'MMM d, yyyy')}
                                     </Badge>
                                   </div>
-                                  <div className="flex flex-wrap gap-1">
-                                    {campaign.target_audience?.map((audience, index) => (
-                                      <Badge key={index} variant="secondary" className="text-xs">
+                                  {campaign.target_audience && (
+                                    <div className="flex flex-wrap gap-1">
+                                      <Badge variant="secondary" className="text-xs">
                                         <Target className="w-2 h-2 mr-1" />
-                                        {audience}
+                                        {campaign.target_audience}
                                       </Badge>
-                                    ))}
-                                  </div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
