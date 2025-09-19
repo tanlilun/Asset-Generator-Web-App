@@ -6,6 +6,7 @@ import { Asset } from './models/asset.js';
 const app = express();
 app.use(express.json());
 app.use(cors());
+const port = process.env.PORT || 3000;
 
 // List campaigns
 app.get('/api/entities', async (req, res) => {
@@ -108,5 +109,17 @@ app.delete('/api/assets/:id', async (req, res) => {
   }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+const listenOnPort = (port) => {
+  app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`Port ${port} is in use, trying another port...`);
+      listenOnPort(port + 1);  // Try the next port (e.g., 3001, 3002, etc.)
+    } else {
+      console.error('Error starting server:', err);
+    }
+  });
+};
+
+listenOnPort(port);
