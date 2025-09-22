@@ -1,4 +1,9 @@
 import { Asset } from './asset.js';
+import dotenv from 'dotenv';
+
+dotenv.config();  // Load environment variables from .env file
+
+const port = process.env.PORT || 3000;
 
 const campaigns = []; // Temporary in-memory store
 
@@ -32,9 +37,11 @@ export const Campaign = {
     
     campaigns.push(newCampaign);
 
-    // Trigger webhook
+    // Trigger webhook with URL from environment variables
+    const webhookUrl = process.env.WEBHOOK_URL || 'https://rapidlab.app.n8n.cloud/webhook/generator';  // Fallback URL if not set
+
     try {
-      await fetch('https://rapidlab.app.n8n.cloud/webhook/generator', {
+      await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -77,4 +84,3 @@ export const Campaign = {
     return removed;
   }
 };
-
