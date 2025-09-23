@@ -70,12 +70,21 @@ export default function Generate() {
         theme: formData.theme,
         target_audience: formData.target_audience,
         description: formData.description,
-        status: "generating",
         captions_status: "pending",
         newsletter_status: "pending",
         images_status: "pending",
-        ads_status: "pending",
+        // ads_status: "pending",
+        ads_leaderboard_1_status: "pending",
+        ads_leaderboard_2_status: "pending",
+        ads_leaderboard_3_status: "pending",
+        ads_billboard_1_status: "pending",
+        ads_billboard_2_status: "pending",
+        ads_billboard_3_status: "pending",
+        ads_half_page_1_status: "pending",
+        ads_half_page_2_status: "pending",
+        ads_half_page_3_status: "pending",
         video_status: "pending",
+        status: "generating"
       });
   
       // 2. Generate captions
@@ -99,8 +108,35 @@ export default function Generate() {
   
       // 5. Generate ads copy
       setGenerationStep("Creating Ad Banners...");
-      await Campaign.update(campaign.id, { ads_status: "generating" });
-      await waitForStatus(campaign.id, "ads_status", "completed");
+      // await Campaign.update(campaign.id, { ads_status: "generating" });
+      await Campaign.update(campaign.id, {
+        ads_leaderboard_1_status: "generating",
+        ads_leaderboard_2_status: "generating",
+        ads_leaderboard_3_status: "generating",
+        ads_billboard_1_status: "generating",
+        ads_billboard_2_status: "generating",
+        ads_billboard_3_status: "generating",
+        ads_half_page_1_status: "generating",
+        ads_half_page_2_status: "generating",
+        ads_half_page_3_status: "generating"
+      });
+
+      const adFields = [
+        "ads_leaderboard_1_status",
+        "ads_leaderboard_2_status",
+        "ads_leaderboard_3_status",
+        "ads_billboard_1_status",
+        "ads_billboard_2_status",
+        "ads_billboard_3_status",
+        "ads_half_page_1_status",
+        "ads_half_page_2_status",
+        "ads_half_page_3_status"
+      ];
+      
+      for (let field of adFields) {
+        await waitForStatus(campaign.id, field, "completed");
+      }
+      // await waitForStatus(campaign.id, "ads_status", "completed");
       setGenerationStep("Ad Banners ready.");
   
       // 6. Generate video script

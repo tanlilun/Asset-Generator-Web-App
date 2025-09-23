@@ -32,7 +32,21 @@ export const Campaign = {
       bank_product: data.bank_product,
       theme: data.theme,
       target_audience: data.target_audience,
-      created_date: new Date().toISOString().split('T')[0]
+      created_date: new Date().toISOString().split('T')[0],
+      captions_status: 'pending',
+      newsletter_status: 'pending',
+      images_status: 'pending',
+      ads_leaderboard_1_status: 'pending',
+      ads_leaderboard_2_status: 'pending',
+      ads_leaderboard_3_status: 'pending',
+      ads_billboard_1_status: 'pending',
+      ads_billboard_2_status: 'pending',
+      ads_billboard_3_status: 'pending',
+      ads_half_page_1_status: 'pending',
+      ads_half_page_2_status: 'pending',
+      ads_half_page_3_status: 'pending',
+      video_status: 'pending',
+      status: 'generating'
     };
     
     campaigns.push(newCampaign);
