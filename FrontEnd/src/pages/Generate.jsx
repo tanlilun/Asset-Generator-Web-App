@@ -150,7 +150,7 @@ export default function Generate() {
       setGenerationStep("All assets generated!");
   
       // 8. Fetch all assets
-      const assets = await AssetSet.getByCampaignId(campaign.id);
+      const assets = await AssetSet.list('-created_date');
   
       // 9. Navigate to assets page
       navigate(createPageUrl("Assets"));
@@ -160,6 +160,7 @@ export default function Generate() {
       setGenerationStep(error.message || "Error occurred. Please try again.");
     } finally {
       setIsGenerating(false);
+      navigate(createPageUrl("Assets"));
     }
   }
   

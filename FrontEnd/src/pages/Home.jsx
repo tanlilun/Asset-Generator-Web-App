@@ -90,7 +90,7 @@ export default function Home() {
 
           {/* CTA Section */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-            <Link to={createPageUrl("Generate")} className="w-full sm:w-auto">
+            <Link to={createPageUrl("Generate")}>
               <Button 
                 size="lg" 
                 className="w-full sm:w-auto h-14 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"

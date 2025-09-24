@@ -8,18 +8,16 @@ import {
   Video
 } from "lucide-react";
 
-import CaptionsSection from "./CaptionsSection";
-import ImageGenerator from "./ImageGenerator";
+import SocialMediaPostSection from "./SocialMediaPostSection";
 import NewsletterEditor from "./NewsletterEditor";
 import AdBuilder from "./AdBuilder";
 import VideoAdSection from "./VideoAdSection";
 
 export default function AssetAccordion({ assetSet, campaign, selectedImageUrl, onSelectImage }) {
-  const [activeTab, setActiveTab] = useState("captions");
+  const [activeTab, setActiveTab] = useState("social");
 
   const tabs = [
-    { id: "captions", label: "Captions", icon: FileText },
-    { id: "images", label: "Images", icon: ImageIcon },
+    { id: "social", label: "Social Posts", icon: ImageIcon },
     { id: "newsletter", label: "Newsletter", icon: Mail },
     { id: "ads", label: "Display Ads", icon: Monitor },
     { id: "video", label: "Video Ad", icon: Video }
@@ -28,7 +26,7 @@ export default function AssetAccordion({ assetSet, campaign, selectedImageUrl, o
   return (
     <div className="border-t border-gray-100 bg-gray-50/50 p-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 bg-white shadow-sm h-auto sm:h-12">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 bg-white shadow-sm h-auto sm:h-12">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.id}
@@ -41,18 +39,11 @@ export default function AssetAccordion({ assetSet, campaign, selectedImageUrl, o
           ))}
         </TabsList>
 
-        <TabsContent value="captions" className="mt-6">
-          <CaptionsSection 
-            captions={assetSet.captions || []} 
-            assetSetId={assetSet.id}
-          />
-        </TabsContent>
-
-        <TabsContent value="images" className="mt-6">
-          <ImageGenerator 
-            images={assetSet.images || []} 
-            onSelectImage={onSelectImage} 
-          />
+        <TabsContent value="social" className="mt-6">
+            <SocialMediaPostSection 
+              assetSet={assetSet} 
+              selectedImageUrl={selectedImageUrl} 
+            />
         </TabsContent>
 
         <TabsContent value="newsletter" className="mt-6">

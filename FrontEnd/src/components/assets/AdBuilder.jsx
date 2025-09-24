@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { User } from "@/api/entities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Download, Monitor } from "lucide-react";
@@ -38,7 +39,21 @@ export default function AdBuilder({ ads }) {
     },
   ];
   
-  const downloadAdPreview = (imageUrl) => {
+  const downloadAdPreview = async (imageUrl, filename) => {
+    // if (!imageUrl) return;
+    // try {
+    //   const response = await fetch(imageUrl);
+    //   const blob = await response.blob();
+    //   const link = document.createElement('a');
+    //   link.href = window.URL.createObjectURL(blob);
+    //   link.download = filename;
+    //   document.body.appendChild(link);
+    //   link.click();
+    //   document.body.removeChild(link);
+    //   window.URL.revokeObjectURL(link.href);
+    // } catch (error) {
+    //   console.error("Download failed:", error);
+    // }
     try {
       window.open(imageUrl, "_blank");
     } catch (err) {
@@ -85,7 +100,7 @@ export default function AdBuilder({ ads }) {
                     </div>
                     <Button
                       variant="outline"
-                      onClick={() => downloadAdPreview(imageUrl)}
+                      onClick={() => downloadAdPreview(imageUrl, `${format.name}-${index + 1}.png`)}
                     >
                       <Download className="w-4 h-4 mr-2" />
                       Download
