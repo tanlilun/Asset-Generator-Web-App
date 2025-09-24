@@ -38,59 +38,14 @@ export default function AdBuilder({ ads }) {
     },
   ];
   
-  const downloadAdPreview = (imageUrl, adType, index, format) => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    const dimensions = {
-      leaderboard: [728, 90],
-      billboard: [970, 250],
-      halfpage: [300, 600],
-    };
-    [canvas.width, canvas.height] = dimensions[adType];
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      let drawWidth = canvas.width;
-      let drawHeight = canvas.height;
-
-      const ratio = img.width / img.height;
-      const targetRatio = canvas.width / canvas.height;
-
-      if (ratio > targetRatio) {
-        drawHeight = canvas.height;
-        drawWidth = drawHeight * ratio;
-      } else {
-        drawWidth = canvas.width;
-        drawHeight = drawWidth / ratio;
-      }
-
-      const offsetX = (canvas.width - drawWidth) / 2;
-      const offsetY = (canvas.height - drawHeight) / 2;
-
-      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-
-      canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${adType}-ad-${index + 1}-${format.size}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      });
-    };
-    img.onerror = () => {
-      console.error("Failed to load image:", imageUrl);
-    };
-    img.src = imageUrl;
+  const downloadAdPreview = (imageUrl) => {
+    try {
+      window.open(imageUrl, "_blank");
+    } catch (err) {
+      console.error("Failed to open image in new tab", err);
+    }
   };
-
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -130,7 +85,7 @@ export default function AdBuilder({ ads }) {
                     </div>
                     <Button
                       variant="outline"
-                      onClick={() => downloadAdPreview(imageUrl, format.key, index, format)}
+                      onClick={() => downloadAdPreview(imageUrl)}
                     >
                       <Download className="w-4 h-4 mr-2" />
                       Download

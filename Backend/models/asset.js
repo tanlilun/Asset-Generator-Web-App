@@ -136,7 +136,7 @@ export const Asset = {
       return null;
     }
   },
-
+  
   delete: async (id) => {
     try {
       const index = assets.findIndex(asset => asset.id === id);
