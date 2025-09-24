@@ -9,128 +9,164 @@ import { base44 } from './base44Client';
 const API_BASE = (import.meta.env.VITE_HOSTED_URL || 'http://localhost:3000') + '/api/entities';
 
 export const Campaign = {
-  // GET /api/entities?sort=...
   async list(sort = '') {
-    const res = await fetch(`${API_BASE}?sort=${encodeURIComponent(sort)}`);
-    if (!res.ok) throw new Error('Failed to fetch campaigns');
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}?sort=${encodeURIComponent(sort)}`);
+      if (!res.ok) throw new Error('Failed to fetch campaigns');
+      return await res.json();
+    } catch (error) {
+      console.error('Error listing campaigns:', error.message);
+      return []; // fallback to empty list
+    }
   },
 
-  // GET /api/entities/:id
   async getById(id) {
-    const res = await fetch(`${API_BASE}/${id}`);
-    if (!res.ok) throw new Error('Failed to fetch campaign');
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/${id}`);
+      if (!res.ok) throw new Error('Failed to fetch campaign');
+      return await res.json();
+    } catch (error) {
+      console.error(`Error fetching campaign ${id}:`, error.message);
+      return null;
+    }
   },
 
-  // POST /api/entities
   async create(data) {
-    const res = await fetch(API_BASE, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    if (!res.ok) throw new Error('Failed to create campaign');
-    return res.json();
+    try {
+      const res = await fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to create campaign');
+      }
+      return await res.json();
+    } catch (error) {
+      console.error('Error creating campaign:', error.message);
+      return null;
+    }
   },
 
-  // PUT /api/entities/:id
   async update(id, data) {
-    const res = await fetch(`${API_BASE}/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || 'Failed to update campaign');
+    try {
+      const res = await fetch(`${API_BASE}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to update campaign');
+      }
+      return await res.json();
+    } catch (error) {
+      console.error(`Error updating campaign ${id}:`, error.message);
+      return null;
     }
-    return res.json();
   },
 
-  // DELETE /api/entities/:id
   async delete(id) {
-    const res = await fetch(`${API_BASE}/${id}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || 'Failed to delete campaign');
+    try {
+      const res = await fetch(`${API_BASE}/${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to delete campaign');
+      }
+      return await res.json();
+    } catch (error) {
+      console.error(`Error deleting campaign ${id}:`, error.message);
+      return null;
     }
-    return res.json();
   },
 };
-  
+
 // frontend/api/Asset.js (or wherever your front-end code resides)
 
 const Asset_API = (import.meta.env.VITE_HOSTED_URL || 'http://localhost:3000') + '/api/assets';
 
 export const AssetSet = {
-  // GET /api/assets?sort=...
   async list(sort = '') {
-    const res = await fetch(`${Asset_API}?sort=${encodeURIComponent(sort)}`);
-    if (!res.ok) throw new Error('Failed to fetch assets');
-    return res.json();
+    try {
+      const res = await fetch(`${Asset_API}?sort=${encodeURIComponent(sort)}`);
+      if (!res.ok) throw new Error('Failed to fetch assets');
+      return await res.json();
+    } catch (error) {
+      console.error('Error listing assets:', error.message);
+      return [];
+    }
   },
 
-  // GET /api/assets/:id
   async getById(id) {
-    const res = await fetch(`${Asset_API}/${id}`);
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || 'Failed to fetch asset');
+    try {
+      const res = await fetch(`${Asset_API}/${id}`);
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to fetch asset');
+      }
+      return await res.json();
+    } catch (error) {
+      console.error(`Error fetching asset ${id}:`, error.message);
+      return null;
     }
-    return res.json();
   },
 
-  // POST /api/assets
   async create(data) {
-    const res = await fetch(Asset_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || 'Failed to create asset');
+    try {
+      const res = await fetch(Asset_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to create asset');
+      }
+      return await res.json();
+    } catch (error) {
+      console.error('Error creating asset:', error.message);
+      return null;
     }
-    return res.json();
   },
 
-  // PUT /api/assets/:id
-  async update(id, data){
-    const res = await fetch(`${Asset_API}/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || 'Failed to update asset');
+  async update(id, data) {
+    try {
+      const res = await fetch(`${Asset_API}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to update asset');
+      }
+      return await res.json();
+    } catch (error) {
+      console.error(`Error updating asset ${id}:`, error.message);
+      return null;
     }
-    return res.json();
   },
 
-  // DELETE /api/assets/:id
   async delete(id) {
-    const res = await fetch(`${Asset_API}/${id}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || 'Failed to delete asset');
+    try {
+      const res = await fetch(`${Asset_API}/${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to delete asset');
+      }
+      return await res.json();
+    } catch (error) {
+      console.error(`Error deleting asset ${id}:`, error.message);
+      return null;
     }
-    return res.json();
   },
 };
+
   
 // auth sdk:
 export const User = base44.auth;

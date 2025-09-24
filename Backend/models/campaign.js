@@ -9,20 +9,31 @@ const campaigns = []; // Temporary in-memory store
 
 export const Campaign = {
   list: async (sortOrder) => {
-    if (sortOrder === 'asc') {
-      return [...campaigns].sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortOrder === 'desc') {
-      return [...campaigns].sort((a, b) => b.name.localeCompare(a.name));
+    try {
+      if (sortOrder === 'asc') {
+        return [...campaigns].sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortOrder === 'desc') {
+        return [...campaigns].sort((a, b) => b.name.localeCompare(a.name));
+      }
+      return campaigns;
+    } catch (error) {
+      console.error('Error listing campaigns:', error.message);
+      return []; // Fallback to empty array
     }
-    return campaigns;
   },
 
   getById: async (id) => {
-    const campaign = campaigns.find((c) => c.id === id);
-    if (!campaign) {
-      throw new Error('Campaign not found');
+    try {
+      const campaign = campaigns.find((c) => c.id === id);
+      if (!campaign) {
+        console.warn(`Campaign with ID ${id} not found.`);
+        return null; // Return null if not found
+      }
+      return campaign;
+    } catch (error) {
+      console.error('Error retrieving campaign by ID:', error.message);
+      return null;
     }
-    return campaign;
   },
 
   create: async (data) => {
@@ -48,53 +59,73 @@ export const Campaign = {
       video_status: 'pending',
       status: 'generating'
     };
-    
-    campaigns.push(newCampaign);
-
-    // Trigger webhook with URL from environment variables
-    const webhookUrl = process.env.WEBHOOK_URL || 'https://rapidlab.app.n8n.cloud/webhook/generator';  // Fallback URL if not set
 
     try {
-      await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newCampaign)
-      });
-    } catch (error) {
-      console.error('Failed to trigger webhook:', error.message);
-      // Optional: log or retry logic, depending on use case
-    }
+      campaigns.push(newCampaign);
 
-    // 2. Automatically create associated asset
-    try {
-      await Asset.create({
-        campaign_id: newCampaign.id,
-        captions: {},
-        images: [],
-        newsletter: {},
-        ads: {},
-        video_ad: {}
-      });
-    } catch (error) {
-      console.error('Failed to create asset for campaign:', error.message);
-    }
+      // Trigger webhook
+      const webhookUrl = process.env.WEBHOOK_URL || 'https://rapidlab.app.n8n.cloud/webhook/generator';
 
-    return newCampaign;
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newCampaign)
+        });
+      } catch (error) {
+        console.error('Failed to trigger webhook:', error.message);
+      }
+
+      // Automatically create associated asset
+      try {
+        await Asset.create({
+          campaign_id: newCampaign.id,
+          captions: {},
+          images: [],
+          newsletter: {},
+          ads: {},
+          video_ad: {}
+        });
+      } catch (error) {
+        console.error('Failed to create asset for campaign:', error.message);
+      }
+
+      return newCampaign;
+    } catch (error) {
+      console.error('Error creating campaign:', error.message);
+      return null;
+    }
   },
 
   update: async (id, data) => {
-    const index = campaigns.findIndex((c) => c.id === id);
-    if (index === -1) throw new Error('Campaign not found');
-    campaigns[index] = { ...campaigns[index], ...data };
-    return campaigns[index];
+    try {
+      const index = campaigns.findIndex((c) => c.id === id);
+      if (index === -1) {
+        console.warn(`Campaign with ID ${id} not found for update.`);
+        return null;
+      }
+      campaigns[index] = { ...campaigns[index], ...data };
+      return campaigns[index];
+    } catch (error) {
+      console.error('Error updating campaign:', error.message);
+      return null;
+    }
   },
 
   delete: async (id) => {
-    const index = campaigns.findIndex((c) => c.id === id);
-    if (index === -1) throw new Error('Campaign not found');
-    const removed = campaigns.splice(index, 1)[0];
-    return removed;
+    try {
+      const index = campaigns.findIndex((c) => c.id === id);
+      if (index === -1) {
+        console.warn(`Campaign with ID ${id} not found for deletion.`);
+        return null;
+      }
+      const removed = campaigns.splice(index, 1)[0];
+      return removed;
+    } catch (error) {
+      console.error('Error deleting campaign:', error.message);
+      return null;
+    }
   }
 };
