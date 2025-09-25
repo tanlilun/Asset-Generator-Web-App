@@ -81,9 +81,17 @@ export default function SocialMediaPostSection({ assetSet, onUpdateAssetSet }) {
   };
 
   const handleDownload = async (url, filename) => {
-     if (!url) return;
+     if (!url) {
+      console.error("No video URL provided.");
+      return;
+    }
+  
     try {
       const response = await fetch(url);
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
       const blob = await response.blob();
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
