@@ -9,8 +9,12 @@ import FacebookPreview from "./previews/FacebookPreview";
 import LinkedInPreview from "./previews/LinkedInPreview";
 import InstagramPreview from "./previews/InstagramPreview";
 
-export default function SocialMediaPostSection({ assetSet, selectedImageUrl }) {
+export default function SocialMediaPostSection({ assetSet, onUpdateAssetSet }) {
   const [user, setUser] = useState(null);
+
+  const selectedImage = assetSet.images?.find(img => img.selected);
+  const selectedImageUrl = selectedImage?.url || "";
+
   const [captions, setCaptions] = useState({
     facebook: assetSet.captions?.facebook || "",
     linkedin: assetSet.captions?.linkedin || "",
@@ -48,14 +52,21 @@ export default function SocialMediaPostSection({ assetSet, selectedImageUrl }) {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Update captions individually instead of combining them into an array
-      await AssetSet.update(assetSet.id, {
+      // Construct updated asset set
+      const updatedAssetSet = {
+        ...assetSet,
         captions: {
           facebook: captions.facebook,
           linkedin: captions.linkedin,
           instagram: captions.instagram,
         },
-      });
+      };
+  
+      // Save to backend
+      await AssetSet.update(assetSet.id, updatedAssetSet);
+  
+      // Notify parent with the updated version
+      onUpdateAssetSet(updatedAssetSet);
     } catch (error) {
       console.error("Failed to save captions", error);
     } finally {
@@ -96,8 +107,8 @@ export default function SocialMediaPostSection({ assetSet, selectedImageUrl }) {
     <div className="space-y-6">
         <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold text-gray-900">Social Media Posts</h3>
-            <Button onClick={handleSave} disabled={isSaving}>
-                {isSaving ? "Saving..." : <><Save className="w-4 h-4 mr-2" /> Save Captions</>}
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Saving..." : <><Save className="w-4 h-4 mr-2" /> Save</>}
             </Button>
         </div>
       <Tabs defaultValue="facebook" className="w-full">

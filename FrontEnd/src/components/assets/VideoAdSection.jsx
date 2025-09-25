@@ -8,40 +8,67 @@ import { Download, Save, Play, Video } from "lucide-react";
 import banklogo from "../img/UnionBank-logo.png";
 import visalogo from "../img/VISA-logo.png";
 
-export default function VideoAdSection({ videoAd, assetSetId }) {
+export default function VideoAdSection({ assetSet, onUpdateAssetSet }) {
+  const videoAd = assetSet.video_ad || {};
   const [overlayText, setOverlayText] = useState(videoAd.overlay_text || "");
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await AssetSet.update(assetSetId, {
-        video_ad: { 
-          script: videoAd.script, // Keep existing script
-          overlay_text: overlayText, 
-          video_url: videoAd.video_url 
-        }
+      const updatedVideoAd = {
+        ...videoAd,
+        overlay_text: overlayText,
+      };
+
+      // Save to API
+      await AssetSet.update(assetSet.id, {
+        video_ad: updatedVideoAd,
       });
+
+      // Notify parent with updated assetSet
+      const updatedAssetSet = {
+        ...assetSet,
+        video_ad: updatedVideoAd,
+      };
+      if (onUpdateAssetSet) {
+        onUpdateAssetSet(updatedAssetSet);
+      }
     } catch (error) {
       console.error("Error saving video ad:", error);
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
 
-  const downloadVideo = () => {
-    if (videoAd.video_url) {
-      // Create a temporary anchor element to trigger download
+  const downloadVideo = async (URL, filename = "video-ad.mp4") => {
+    if (!URL) {
+      console.error("No video URL provided.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(URL);
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const blob = await response.blob();
+  
       const link = document.createElement('a');
-      link.href = videoAd.video_url;
-      link.download = 'video-ad.mp4';
-      link.target = '_blank';
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename;
+  
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } else {
-      console.warn("No video URL available for download");
+  
+      window.URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error("Download failed:", error);
     }
-  };
+  };  
 
   return (
     <div className="space-y-6">
@@ -100,10 +127,10 @@ export default function VideoAdSection({ videoAd, assetSetId }) {
             <div className="space-y-2">
               <Label>Video Preview</Label>
               <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center border-2 border-dashed border-purple-200">
-                <div className="text-center">
+                <div className="text-center w-full h-full">
                   {videoAd.video_url ? (
                     <div className="relative w-full h-full rounded-lg overflow-hidden">
-                      <video 
+                      <video
                         className="w-full h-full object-cover"
                         controls
                         poster=""
@@ -111,33 +138,29 @@ export default function VideoAdSection({ videoAd, assetSetId }) {
                         <source src={videoAd.video_url} type="video/mp4" />
                         Your browser does not support the video tag.
                       </video>
-                    
-                      {/* Overlay Text */}
+
                       {overlayText && (
                         <div className="absolute bottom-16 left-4 text-white font-extrabold text-3xl leading-tight drop-shadow-md uppercase z-10">
                           {overlayText}
                         </div>
                       )}
-                    
-                      {/* Logos */}
+
                       <div className="absolute bottom-4 right-4 flex items-center space-x-2 z-10">
-                        <img
-                          src={visalogo}
-                          alt="VISA"
-                          className="h-6 md:h-8"
-                        />
+                        <img src={visalogo} alt="VISA" className="h-6 md:h-8" />
                         <img
                           src={banklogo}
                           alt="Partner Logo"
                           className="h-6 md:h-8"
                         />
                       </div>
-                    </div>                  
+                    </div>
                   ) : (
                     <>
                       <Play className="w-16 h-16 text-purple-400 mx-auto mb-2" />
                       <p className="text-purple-600 font-medium">Video Preview</p>
-                      <p className="text-sm text-gray-500 mt-1">15-second video ad</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        15-second video ad
+                      </p>
                       {overlayText && (
                         <div className="mt-4 px-4 py-2 bg-black/80 text-white text-sm rounded">
                           {overlayText}

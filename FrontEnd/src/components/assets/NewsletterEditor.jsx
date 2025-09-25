@@ -6,7 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy, Save, Mail, Check } from "lucide-react";
 
-export default function NewsletterEditor({ newsletter, assetSetId, selectedImageUrl }) {
+export default function NewsletterEditor({ assetSet, onUpdateAssetSet }) {
+  const newsletter = assetSet.newsletter || {};
+  const selectedImageUrl = assetSet?.selected_image_url || null;
+
   const [subject, setSubject] = useState(newsletter.subject || "");
   const [headline, setHeadline] = useState(newsletter.headline || "");
   const [caption, setCaption] = useState(newsletter.caption || "");
@@ -15,12 +18,12 @@ export default function NewsletterEditor({ newsletter, assetSetId, selectedImage
   const [description1, setDescription1] = useState(newsletter.description1 || "");
   const [point2, setPoint2] = useState(newsletter.point2 || "");
   const [description2, setDescription2] = useState(newsletter.description2 || "");
-  const [body, setBody] = useState(newsletter.body || ""); // keep generated html here
+  const [body, setBody] = useState(newsletter.body || "");
 
   const [isSaving, setIsSaving] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Regenerate email HTML whenever inputs change
+  // Generate newsletter body HTML
   useEffect(() => {
     const generatedHTML = `
     <!DOCTYPE html>
@@ -78,33 +81,41 @@ export default function NewsletterEditor({ newsletter, assetSetId, selectedImage
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await AssetSet.update(assetSetId, {
-        newsletter: {
-          subject,
-          headline,
-          caption,
-          cta,
-          point1,
-          description1,
-          point2,
-          description2,
-          body,
-        },
+      const updatedNewsletter = {
+        subject,
+        headline,
+        caption,
+        cta,
+        point1,
+        description1,
+        point2,
+        description2,
+        body,
+      };
+
+      await AssetSet.update(assetSet.id, {
+        newsletter: updatedNewsletter,
       });
+
+      // Optional: sync with parent
+      if (onUpdateAssetSet) {
+        const updatedAssetSet = {
+          ...assetSet,
+          newsletter: updatedNewsletter,
+        };
+        onUpdateAssetSet(updatedAssetSet);
+      }
     } catch (error) {
       console.error("Error saving newsletter:", error);
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
 
-  // Copy HTML to clipboard including subject
+  // Copy to clipboard
   const copyHtml = async () => {
     try {
-      const htmlContent = `
-Subject: ${subject}
-${body}
-      `.trim();
-
+      const htmlContent = `Subject: ${subject}\n\n${body}`;
       await navigator.clipboard.writeText(htmlContent);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -155,96 +166,36 @@ ${body}
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Inputs for all fields */}
+        {/* Input Fields */}
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg">Email Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="subject">Email Subject</Label>
-              <Input
-                id="subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Enter email subject line"
-                className="text-base"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="headline">Headline</Label>
-              <Input
-                id="headline"
-                value={headline}
-                onChange={(e) => setHeadline(e.target.value)}
-                placeholder="Enter headline"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="caption">Image Caption</Label>
-              <Input
-                id="caption"
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                placeholder="Enter image caption"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="cta">Call to Action (Button Text)</Label>
-              <Input
-                id="cta"
-                value={cta}
-                onChange={(e) => setCta(e.target.value)}
-                placeholder="Enter CTA button text"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="point1">Point 1 Title</Label>
-              <Input
-                id="point1"
-                value={point1}
-                onChange={(e) => setPoint1(e.target.value)}
-                placeholder="Enter first point title"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="description1">Point 1 Description</Label>
-              <Input
-                id="description1"
-                value={description1}
-                onChange={(e) => setDescription1(e.target.value)}
-                placeholder="Enter first point description"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="point2">Point 2 Title</Label>
-              <Input
-                id="point2"
-                value={point2}
-                onChange={(e) => setPoint2(e.target.value)}
-                placeholder="Enter second point title"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="description2">Point 2 Description</Label>
-              <Input
-                id="description2"
-                value={description2}
-                onChange={(e) => setDescription2(e.target.value)}
-                placeholder="Enter second point description"
-              />
-            </div>
+            {[
+              { id: "subject", label: "Email Subject", value: subject, setter: setSubject },
+              { id: "headline", label: "Headline", value: headline, setter: setHeadline },
+              { id: "caption", label: "Image Caption", value: caption, setter: setCaption },
+              { id: "cta", label: "Call to Action (Button Text)", value: cta, setter: setCta },
+              { id: "point1", label: "Point 1 Title", value: point1, setter: setPoint1 },
+              { id: "description1", label: "Point 1 Description", value: description1, setter: setDescription1 },
+              { id: "point2", label: "Point 2 Title", value: point2, setter: setPoint2 },
+              { id: "description2", label: "Point 2 Description", value: description2, setter: setDescription2 },
+            ].map(({ id, label, value, setter }) => (
+              <div key={id}>
+                <Label htmlFor={id}>{label}</Label>
+                <Input
+                  id={id}
+                  value={value}
+                  onChange={(e) => setter(e.target.value)}
+                  placeholder={`Enter ${label.toLowerCase()}`}
+                />
+              </div>
+            ))}
           </CardContent>
         </Card>
 
-        {/* Live Preview */}
+        {/* Preview */}
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg">Live Preview</CardTitle>

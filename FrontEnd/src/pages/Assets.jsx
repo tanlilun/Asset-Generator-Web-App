@@ -343,11 +343,14 @@ export default function Assets() {
                         <CollapsibleContent>
                           {assetSet && (
                             <AssetAccordion 
-                              assetSet={assetSet} 
-                              campaign={campaign} 
-                              selectedImageUrl={selectedImages[assetSet.id]}
-                              onSelectImage={(imageIndex) => handleSelectImage(assetSet.id, imageIndex)}
-                            />
+                              assetSet={assetSet}
+                              onUpdateAssetSet={(updatedAssetSet) => {
+                                setAssetSets(prev => ({
+                                  ...prev,
+                                  [updatedAssetSet.campaign_id]: updatedAssetSet,
+                                }));
+                              }}
+                            />                          
                           )}
                         </CollapsibleContent>
                       </Card>

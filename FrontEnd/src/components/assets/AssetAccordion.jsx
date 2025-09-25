@@ -13,7 +13,7 @@ import NewsletterEditor from "./NewsletterEditor";
 import AdBuilder from "./AdBuilder";
 import VideoAdSection from "./VideoAdSection";
 
-export default function AssetAccordion({ assetSet, campaign, selectedImageUrl, onSelectImage }) {
+export default function AssetAccordion({ assetSet, onUpdateAssetSet  }) {
   const [activeTab, setActiveTab] = useState("social");
 
   const tabs = [
@@ -42,28 +42,29 @@ export default function AssetAccordion({ assetSet, campaign, selectedImageUrl, o
         <TabsContent value="social" className="mt-6">
             <SocialMediaPostSection 
               assetSet={assetSet} 
-              selectedImageUrl={selectedImageUrl} 
+              onUpdateAssetSet={onUpdateAssetSet}
             />
         </TabsContent>
 
         <TabsContent value="newsletter" className="mt-6">
           <NewsletterEditor 
-            newsletter={assetSet.newsletter || {}} 
-            assetSetId={assetSet.id}
-            selectedImageUrl={selectedImageUrl} 
+            assetSet={assetSet} 
+            onUpdateAssetSet={onUpdateAssetSet}
           />
         </TabsContent>
 
         <TabsContent value="ads" className="mt-6">
           <AdBuilder 
-            ads={assetSet.ads || {}} 
-            assetSetId={assetSet.id}
-            selectedImageUrl={selectedImageUrl}
+            assetSet={assetSet} 
+            onUpdateAssetSet={onUpdateAssetSet}
           />
         </TabsContent>
 
         <TabsContent value="video" className="mt-6">
-          <VideoAdSection videoAd={assetSet.video_ad || {}} assetSetId={assetSet.id} />
+          <VideoAdSection 
+            assetSet={assetSet} 
+            onUpdateAssetSet={onUpdateAssetSet}
+          />
         </TabsContent>
       </Tabs>
     </div>
