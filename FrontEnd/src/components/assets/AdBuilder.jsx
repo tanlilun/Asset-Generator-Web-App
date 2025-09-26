@@ -111,8 +111,12 @@ export default function AdBuilder({ assetSet, onUpdateAssetSet }) {
                 <CardContent>
                   <div className="flex items-center gap-6">
                     <div
-                      className="bg-white border-2 border-dashed border-gray-300 w-full max-w-3xl overflow-hidden"
-                      style={{ aspectRatio: format.size.replace("x", "/") }}
+                      className="bg-white border-2 border-dashed border-gray-300 overflow-hidden mx-auto"
+                      style={{
+                        width: format.key === "halfpage" ? "300px" : "100%",
+                        height: format.key === "halfpage" ? "600px" : "auto",
+                        aspectRatio: format.key !== "halfpage" ? format.size.replace("x", "/") : undefined,
+                      }}
                     >
                       <img
                         src={imageUrl}

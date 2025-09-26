@@ -104,6 +104,28 @@ export default function SocialMediaPostSection({ assetSet, onUpdateAssetSet }) {
       console.error("Download failed:", error);
     }
   };
+
+  const downloadVideoPreview = async (imageUrl) => {
+    // if (!imageUrl) return;
+    // try {
+    //   const response = await fetch(imageUrl);
+    //   const blob = await response.blob();
+    //   const link = document.createElement('a');
+    //   link.href = window.URL.createObjectURL(blob);
+    //   link.download = filename;
+    //   document.body.appendChild(link);
+    //   link.click();
+    //   document.body.removeChild(link);
+    //   window.URL.revokeObjectURL(link.href);
+    // } catch (error) {
+    //   console.error("Download failed:", error);
+    // }
+    try {
+      window.open(imageUrl, "_blank");
+    } catch (err) {
+      console.error("Failed to open image in new tab", err);
+    }
+  };
   
   const platformTabs = [
     { name: "Facebook", icon: Facebook, value: "facebook" },
@@ -177,7 +199,7 @@ export default function SocialMediaPostSection({ assetSet, onUpdateAssetSet }) {
                 </div>
                  <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => handleCopy(captions.instagram, 'instagram')}>{copied === 'instagram' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}</Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDownload(assetSet.video_ad?.video_url, "instagram-video.mp4")}><Download className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => downloadVideoPreview(assetSet.video_ad?.video_url)}><Download className="w-4 h-4" /></Button>
                  </div>
               </div>
             </div>

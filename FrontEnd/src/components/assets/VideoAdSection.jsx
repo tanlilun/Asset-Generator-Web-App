@@ -42,31 +42,37 @@ export default function VideoAdSection({ assetSet, onUpdateAssetSet }) {
   };
 
   const downloadVideo = async (URL, filename = "video-ad.mp4") => {
-    if (!URL) {
-      console.error("No video URL provided.");
-      return;
-    }
+    // if (!URL) {
+    //   console.error("No video URL provided.");
+    //   return;
+    // }
   
+    // try {
+    //   const response = await fetch(URL);
+  
+    //   if (!response.ok) {
+    //     throw new Error(`HTTP error! Status: ${response.status}`);
+    //   }
+  
+    //   const blob = await response.blob();
+  
+    //   const link = document.createElement('a');
+    //   link.href = window.URL.createObjectURL(blob);
+    //   link.download = filename;
+  
+    //   document.body.appendChild(link);
+    //   link.click();
+    //   document.body.removeChild(link);
+  
+    //   window.URL.revokeObjectURL(link.href);
+    // } catch (error) {
+    //   console.error("Download failed:", error);
+    // }
+
     try {
-      const response = await fetch(URL);
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-  
-      const blob = await response.blob();
-  
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = filename;
-  
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-  
-      window.URL.revokeObjectURL(link.href);
-    } catch (error) {
-      console.error("Download failed:", error);
+      window.open(URL, "_blank");
+    } catch (err) {
+      console.error("Failed to open image in new tab", err);
     }
   };  
 
@@ -80,7 +86,7 @@ export default function VideoAdSection({ assetSet, onUpdateAssetSet }) {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={downloadVideo}
+            onClick={() => downloadVideo(videoAd.video_url)}
             disabled={!videoAd.video_url}
           >
             <Download className="w-4 h-4 mr-2" />
